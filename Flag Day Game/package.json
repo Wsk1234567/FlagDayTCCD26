@@ -1,0 +1,10 @@
+{
+  "name": "tccd-flag-day-2026",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/league.test.js",
+    "validate": "node tools/manage-event.mjs validate",
+    "finalize": "node tools/manage-event.mjs finalize"
+  }
+}

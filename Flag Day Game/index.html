@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101114">
+  <meta name="description" content="TCCD Flag Day 2026 小组联赛。自愿参与，每张贴纸 RM5，共同支持社区服务。">
+  <title>TCCD · Flag Day 2026</title>
+  <link rel="icon" href="./assets/emblem.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <header class="site-header">
+    <a class="brand" href="#" aria-label="TCCD Flag Day 首页"><img src="./assets/emblem.svg" width="36" height="40" alt=""><span>TCCD<span class="brand-sub">FLAG DAY / 2026</span></span></a>
+    <nav aria-label="主要导航"><a class="nav-link active" href="#overview">战况总览</a><a class="nav-link" href="#league">小组联赛</a><a class="nav-link" href="#squads">战队 & 成就</a><a class="nav-link" href="#rules">活动须知</a></nav>
+    <span class="header-tag"><i></i> TOGETHER FOR GOOD</span>
+  </header>
+
+  <main id="main">
+    <section class="hero section-anchor" id="overview" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="tiny-cross">✚</span> TCCD FLAG DAY 2026 <span class="eyebrow-sep">/</span> 小组联赛</div>
+        <h1 id="hero-title">为团队而战。<br>为<span class="accent-text">善意</span>加分。</h1>
+        <p class="hero-description">每一张贴纸，都是一份支持。<br>Team A、Team B，七个小组，一个共同目标。</p>
+        <div class="hero-actions"><a class="button button-primary" href="#league">查看联赛排名 <span aria-hidden="true">↗</span></a><a class="text-link" href="#rules">了解活动规则 <span aria-hidden="true">→</span></a></div>
+        <div class="hero-notes"><span><b>RM5</b> / 每张贴纸</span><span class="note-divider"></span><span>自愿参与 · 不设个人销售指标</span></div>
+      </div>
+      <div class="mission-panel">
+        <div class="panel-top"><span class="eyebrow muted">COLLECTIVE MISSION</span><span class="small-chip">全团共同挑战</span></div>
+        <div class="mission-ring" id="mission-ring"><div class="ring-center"><span class="ring-label">全团已核实销量</span><strong id="mission-total">—</strong><span class="ring-unit">张贴纸 / STICKERS</span></div><span class="ring-cross" aria-hidden="true">✚</span></div>
+        <div class="mission-target"><span id="mission-target">正在读取共同里程碑…</span><strong id="mission-percent">—</strong></div>
+        <div class="progress-track"><div id="mission-bar" class="progress-fill"></div></div>
+        <p class="mission-caption" id="mission-caption">第 1–7 组 + F5 Gang，共同贡献每一张。</p>
+        <div class="mission-bottom"><span>每累计 100 张，解锁共同里程碑</span><span aria-hidden="true">↗</span></div>
+      </div>
+      <span class="hero-watermark" aria-hidden="true">26</span>
+    </section>
+
+    <div class="status-strip"><span id="event-state" class="status-label"><i></i> 正在读取活动状态</span><span id="deadline">截止日期待公布</span><span id="updated-at">成绩更新时间待确认</span></div>
+    <div id="load-error" class="error-panel" role="alert" hidden><div><strong>暂时无法读取成绩</strong><p id="error-message">请稍后重试。</p></div><button id="retry" class="button button-outline" type="button">重新加载 ↻</button></div>
+    <p id="data-announcement" class="sr-only" role="status" aria-live="polite"></p>
+
+    <section class="stats-grid" aria-label="活动统计" aria-busy="true" id="stats">
+      <article class="stat-card"><span class="stat-label">已核实销量 <span class="stat-icon" aria-hidden="true">▧</span></span><strong id="stat-sold">—</strong><span class="stat-caption">包含 F5 特别挑战组</span></article>
+      <article class="stat-card"><span class="stat-label">销量对应金额 <span class="stat-icon" aria-hidden="true">↗</span></span><strong id="stat-value">—</strong><span class="stat-caption">已核实销量 × RM5</span></article>
+      <article class="stat-card"><span class="stat-label">财政已收金额 <span class="stat-icon" aria-hidden="true">✓</span></span><strong id="stat-received">—</strong><span class="stat-caption">以财政确认收到的金额为准</span></article>
+      <article class="stat-card"><span class="stat-label">共同里程碑 <span class="stat-icon" aria-hidden="true">⚑</span></span><strong id="stat-milestones">—</strong><span class="stat-caption">每 100 张解锁一站</span></article>
+    </section>
+
+    <section class="section-anchor league-section" id="league" aria-labelledby="league-title">
+      <div class="section-heading"><div><span class="eyebrow muted">01 / THE LEAGUE</span><h2 id="league-title">七组集结，榜上见。</h2></div><span class="heading-note">累计核实销量排名 <span class="dot-separator">·</span> 同销量并列</span></div>
+      <div class="teams-comparison" aria-label="Team A 与 Team B 总销量">
+        <article class="team-scorecard team-a"><div><span class="eyebrow">TEAM A</span><h3>Team A</h3><p>第 1、2、3 组</p></div><div class="team-score"><strong id="team-a-sold">—</strong><span>张已核实</span><small id="team-a-value">—</small></div></article>
+        <span class="team-versus" aria-hidden="true">VS</span>
+        <article class="team-scorecard team-b"><div><span class="eyebrow">TEAM B</span><h3>Team B</h3><p>第 4、5、6、7 组</p></div><div class="team-score"><strong id="team-b-sold">—</strong><span>张已核实</span><small id="team-b-value">—</small></div></article>
+      </div>
+      <p class="team-comparison-note"><span id="team-battle-state">等待首份核实成绩</span><span>F5 独立挑战，不计入 Team A／B。</span></p>
+      <div class="league-grid">
+        <div class="leaderboard panel"><div class="board-header"><h3>小组排行榜</h3><span id="board-state" class="small-chip">冠军待结赛确认</span></div><div class="table-wrap"><table><caption class="sr-only">第 1–7 组按累计核实销量排名，F5 不参加此排名</caption><thead><tr><th scope="col">排名</th><th scope="col">战队</th><th scope="col" class="numeric">已核实销量</th><th scope="col" class="numeric gap-column">距上一名</th></tr></thead><tbody id="leaderboard-body"><tr><td colspan="4" class="empty-cell">正在读取排名…</td></tr></tbody></table></div><div class="board-foot"><span class="live-dot"></span><span>Lance Corporal（LC）当面核对收款后计入；交接钱款不重复加分。</span></div></div>
+        <aside class="f5-panel panel" aria-labelledby="f5-title"><div class="f5-top"><span class="eyebrow">SPECIAL CHALLENGER</span><span class="f5-star" aria-hidden="true">✦</span></div><div class="f5-emblem" aria-hidden="true">F5</div><h3 id="f5-title">F5 Gang</h3><p class="f5-description">独立挑战，同一份善意。</p><div class="f5-total"><strong id="f5-sold">—</strong><span>张已核实贴纸</span></div><div class="f5-facts"><span>对应金额</span><strong id="f5-value">—</strong></div><div class="f5-facts"><span>财政已收</span><strong id="f5-received">—</strong></div><div id="f5-badges" class="f5-badges">成绩读取中</div><p class="f5-note">贡献计入全团进度，独立解锁成就。<br>不参与七组冠军排名。</p></aside>
+      </div>
+    </section>
+
+    <section class="section-anchor squads-section" id="squads" aria-labelledby="squads-title"><div class="section-heading"><div><span class="eyebrow muted">02 / SQUADS & ACHIEVEMENTS</span><h2 id="squads-title">每个战队，都有高光。</h2></div><span class="heading-note">点开战队，查看成就与交接状态 ↘</span></div><div class="achievement-legend"><span class="legend-title">成就路线</span><span>10 张 <b>初露锋芒</b></span><span>25 张 <b>默契集结</b></span><span>50 张 <b>善意先锋</b></span><span>100 张 <b>百张荣耀</b></span><span class="handoff-legend">✓ 圆满交接</span></div><div id="squad-grid" class="squad-grid"><p class="section-placeholder">正在读取战队…</p></div><p class="quiet-note">里程碑是鼓励目标。未达成不会产生付款义务；未售出的贴纸按规定交回即可。</p></section>
+
+    <section class="section-anchor rules-section" id="rules" aria-labelledby="rules-title"><div class="section-heading"><div><span class="eyebrow muted">03 / PLAY WITH INTEGRITY</span><h2 id="rules-title">热血参赛，认真交接。</h2></div><span class="rules-tag">自愿 · 安全 · 诚信</span></div><div class="rules-layout"><div class="rules-list panel"><h3>活动九条规则</h3><ol><li><span><strong>每张贴纸 RM5</strong>，不得自行更改价格。</span></li><li><span><strong>自愿参与</strong>，不能强迫 member 或公众购买，也不能强求 member 自己付钱买下未售出的贴纸。</span></li><li><span>向家人、亲友介绍活动；<strong>不得沿街、在路口或挨家挨户筹款</strong>。其他销售地点先向负责人确认。</span></li><li><span>领取、追加及交回贴纸，都必须让负责的 <strong>Lance Corporal 记录数量</strong>。</span></li><li><span>收到的钱必须妥善保管，<strong>不得借用、花掉或混作自己的钱</strong>。</span></li><li><span>Member 把钱和剩余贴纸交给 LC；LC 核对后交给 Corporal；Corporal 再交财政。<strong>每次交接，双方当面点清并记录。</strong></span></li><li><span>各组必须在<strong>指定截止日期</strong>前交齐记录、钱和剩余贴纸。F5 组由 Cadet Leader 统一直接交财政。</span></li><li><span>贴纸或钱遗失、金额对不上、收到投诉时，<strong>马上报告上一级 NCO，不要隐瞒或自行处理</strong>。</span></li><li><span><strong>禁止在学校一班一班去卖</strong>，可以私底下去问。</span></li></ol></div><aside class="handoff-panel panel"><span class="eyebrow muted">THE HANDOFF</span><h3>每一步，都点清。</h3><p>钱款、剩余贴纸和记录一起交接。网站成绩不会替代正式交接记录。</p><h4>普通组 / 第 1–7 组</h4><ol class="handoff-flow"><li><span class="flow-node">01</span><div><strong>Member</strong><span>交钱、剩余贴纸与记录</span></div></li><li><span class="flow-node">02</span><div><strong>Lance Corporal</strong><span>当面核对收款，记录核实销量</span></div></li><li><span class="flow-node">03</span><div><strong>Corporal</strong><span>核对后交财政</span></div></li><li><span class="flow-node">04</span><div><strong>财政</strong><span>确认收到钱款与交接资料</span></div></li></ol><p class="handoff-reminder">每次交接，双方当面点清并记录。主动报告问题不会直接扣除竞赛积分。</p></aside></div></section>
+    <div class="closing-banner"><span class="tiny-cross" aria-hidden="true">✚</span><p>一张贴纸，一份善意。<span>一起让支持被看见。</span></p><a href="#overview" aria-label="回到战况总览">↑</a></div>
+  </main>
+  <footer><span><b>TCCD</b> FLAG DAY 2026</span><span>PERKHIDMATAN BAGI MANUSIA</span><span>每张 RM5 · 自愿参与</span></footer>
+  <noscript><div class="noscript-notice">请启用 JavaScript 以查看核实成绩。活动九条规则仍可在下方阅读。</div></noscript>
+</body>
+</html>
+
