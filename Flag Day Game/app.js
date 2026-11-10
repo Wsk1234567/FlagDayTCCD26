@@ -1,4 +1,4 @@
-import { PRICE, GROUP_IDS, getTeamForGroup, getAchievements, summarizeEvent } from './league.js';
+import { PRICE, GROUP_IDS, getTeamForGroup, getAchievements, eventFromSheetTable, summarizeEvent } from './league.js';
 
 const $ = id => document.getElementById(id);
 const number = value => new Intl.NumberFormat('en-MY').format(value);
@@ -14,6 +14,7 @@ const teamStyles = {
   '7': { color: '#f598c4', name: 'ROSE', symbol: '✧' },
   'f5': { color: '#c6a1ff', name: 'SPECIAL', symbol: 'F5' },
 };
+const SHEET_QUERY_URL = 'https://docs.google.com/spreadsheets/d/1EFONafHGDB-qucQ8V9CL3kPJN1_RfaTyxrZ9KC2ht_8/gviz/tq?gid=0&range=A4:D13';
 function dateText(value) {
   return new Intl.DateTimeFormat('zh-Hans', { timeZone: 'Asia/Kuala_Lumpur', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(value));
 }
@@ -22,6 +23,7 @@ function setText(id, value) { $(id).textContent = value; }
 function render(data) {
   const summary = summarizeEvent(data);
   const final = data.status === 'final';
+  const syncedFromSheets = data.source === 'google-sheets';
   setText('mission-total', number(summary.totalSold));
   $('mission-ring').style.setProperty('--total-size', `${Math.min(57, 240 / number(summary.totalSold).length)}px`);
   setText('mission-target', `下一站：累计 ${number(summary.nextMilestone)} 张`);
@@ -33,10 +35,10 @@ function render(data) {
   setText('stat-value', money(summary.totalValue));
   setText('stat-received', money(summary.treasuryReceived));
   setText('stat-milestones', `${number(summary.milestones)} 站`);
-  $('event-state').innerHTML = `<i></i>${final ? '结赛确认 · 最终成绩已锁定' : data.updatedAt ? '联赛进行中' : '战队已集结 · 等待首次成绩发布'}`;
+  $('event-state').innerHTML = `<i></i>${final ? '结赛确认 · 最终成绩已锁定' : syncedFromSheets ? '联赛进行中 · Google Sheets 自动同步' : data.updatedAt ? '联赛进行中' : '战队已集结 · 等待首次成绩发布'}`;
   $('event-state').classList.toggle('final-state', final);
   setText('deadline', summary.deadline ? `交接截止：${dateText(summary.deadline)}（马来西亚时间）` : '截止日期待公布');
-  setText('updated-at', summary.updatedAt ? `${final ? '结赛确认' : '最后更新'}：${dateText(summary.updatedAt)}（MYT）` : '尚未发布成绩');
+  setText('updated-at', summary.updatedAt ? `${final ? '结赛确认' : syncedFromSheets ? 'Google Sheets 同步' : '最后更新'}：${dateText(summary.updatedAt)}（MYT）` : '尚未发布成绩');
   setText('board-state', final ? '最终排名' : '冠军待结赛确认');
   for (const team of summary.teams) {
     setText(`team-${team.id}-sold`, number(team.verifiedSold));
@@ -90,6 +92,46 @@ function render(data) {
   $('stats').setAttribute('aria-busy', 'false');
 }
 
+function loadGoogleSheetTable(timeoutMs = 10000) {
+  return new Promise((resolve, reject) => {
+    const callbackName = `__flagDaySheet_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const script = document.createElement('script');
+    let timer;
+    const cleanup = () => {
+      clearTimeout(timer);
+      script.remove();
+      delete window[callbackName];
+    };
+    window[callbackName] = response => {
+      if (response?.status !== 'ok' || !response.table) {
+        cleanup();
+        reject(new Error('Google Sheets 回传无效资料。'));
+        return;
+      }
+      const table = response.table;
+      cleanup();
+      resolve(table);
+    };
+    script.onerror = () => {
+      cleanup();
+      reject(new Error('无法连接 Google Sheets。'));
+    };
+    timer = setTimeout(() => {
+      cleanup();
+      reject(new Error('Google Sheets 同步超时。'));
+    }, timeoutMs);
+    script.src = `${SHEET_QUERY_URL}&tqx=responseHandler:${callbackName}&_=${Date.now()}`;
+    document.head.append(script);
+  });
+}
+
+function showFallbackNotice(error) {
+  $('load-error').hidden = false;
+  $('load-error').querySelector('strong').textContent = 'Google Sheets 暂时无法同步';
+  setText('error-message', `正在显示最后一次发布的备份成绩。${error.message}`);
+  $('retry').textContent = '重新同步 ↻';
+}
+
 function clearResults() {
   for (const id of ['mission-total', 'mission-percent', 'stat-sold', 'stat-value', 'stat-received', 'stat-milestones', 'f5-sold', 'f5-value', 'f5-received']) setText(id, '—');
   for (const id of ['team-a-sold', 'team-b-sold', 'team-a-value', 'team-b-value']) setText(id, '—');
@@ -118,11 +160,24 @@ async function load() {
   try {
     const response = await fetch(new URL('./data/event.json', import.meta.url), { cache: 'no-store', signal: controller.signal });
     if (!response.ok) throw new Error(`成绩文件读取失败（HTTP ${response.status}）。`);
-    const data = await response.json();
-    render(data);
+    const fallbackData = await response.json();
+    if (fallbackData.status === 'final') {
+      render(fallbackData);
+    } else {
+      try {
+        const table = await loadGoogleSheetTable();
+        const syncedAt = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
+        render(eventFromSheetTable(fallbackData, table, syncedAt));
+      } catch (sheetError) {
+        render(fallbackData);
+        showFallbackNotice(sheetError);
+      }
+    }
   } catch (error) {
     clearResults();
     $('load-error').hidden = false;
+    $('load-error').querySelector('strong').textContent = '暂时无法读取成绩';
+    $('retry').textContent = '重新加载 ↻';
     setText('error-message', error.name === 'AbortError' ? '读取超时。请检查网络后重新加载。' : `未显示任何推测成绩。${error instanceof SyntaxError ? '成绩文件格式有误，请联系负责人。' : error.message}`);
     setText('data-announcement', '无法读取有效成绩，请重新加载或联系负责人。');
     $('stats').setAttribute('aria-busy', 'false');

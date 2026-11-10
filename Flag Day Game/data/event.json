@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-10T13:38:00+08:00",
+  "updatedAt": "2026-11-10T15:21:00+08:00",
   "deadline": null,
   "status": "live",
   "groups": [
@@ -10,7 +10,7 @@
     { "id": "5", "name": "第 5 组", "verifiedSold": 0, "treasuryReceived": 0, "handoffComplete": false },
     { "id": "6", "name": "第 6 组", "verifiedSold": 0, "treasuryReceived": 0, "handoffComplete": false },
     { "id": "7", "name": "第 7 组", "verifiedSold": 0, "treasuryReceived": 0, "handoffComplete": false },
-    { "id": "f5", "name": "F5 Gang", "verifiedSold": 0, "treasuryReceived": 0, "handoffComplete": false }
+    { "id": "f5", "name": "F5 Gang", "verifiedSold": 18, "treasuryReceived": 90, "handoffComplete": false }
   ],
   "finalSnapshot": null
 }

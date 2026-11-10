@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { validateEvent, summarizeEvent, getAchievements } from '../league.js';
+import { validateEvent, summarizeEvent, getAchievements, eventFromSheetTable } from '../league.js';
 
 const initial = JSON.parse(await readFile(new URL('../data/event.json', import.meta.url), 'utf8'));
 function fixture() {
@@ -16,6 +16,26 @@ function fixture() {
 function group(data, id) { return data.groups.find(g => g.id === id); }
 
 test('published data is valid', () => { assert.doesNotThrow(() => validateEvent(initial)); });
+test('Google Sheets total table maps groups 1–7 and F5 into live event data', () => {
+  const data = fixture();
+  const rows = ['第1组', '第2组', '第3组', '第4组', '第5组', '第6组', '第7组', 'F5组'].map((label, index) => ({ c: [{ v: label }, null, index === 1 ? { v: 1 } : index === 7 ? { v: 18 } : null, { v: index === 1 ? 5 : index === 7 ? 90 : 0 }] }));
+  rows.push({ c: [{ v: '总计' }, null, { v: 19 }, { v: 95 }] });
+  const synced = eventFromSheetTable(data, { rows }, '2026-11-10T15:21:00+08:00');
+  assert.equal(group(synced, '2').verifiedSold, 1);
+  assert.equal(group(synced, 'f5').verifiedSold, 18);
+  assert.equal(summarizeEvent(synced).totalSold, 19);
+  assert.equal(summarizeEvent(synced).treasuryReceived, 95);
+  assert.equal(synced.source, 'google-sheets');
+});
+test('Google Sheets sync rejects missing groups, inconsistent totals and invalid RM5 amounts', () => {
+  const data = fixture();
+  const validRows = ['第1组', '第2组', '第3组', '第4组', '第5组', '第6组', '第7组', 'F5组'].map(label => ({ c: [{ v: label }, null, { v: 0 }, { v: 0 }] }));
+  assert.throws(() => eventFromSheetTable(data, { rows: validRows.slice(0, -1) }, data.updatedAt), /缺少/);
+  assert.throws(() => eventFromSheetTable(data, { rows: [...validRows, { c: [{ v: '总计' }, null, { v: 1 }, { v: 0 }] }] }, data.updatedAt), /总计/);
+  validRows[0].c[2] = { v: 1 };
+  validRows[0].c[3] = { v: 6 };
+  assert.throws(() => eventFromSheetTable(data, { rows: validRows }, data.updatedAt), /财政已收金额/);
+});
 test('Team A includes groups 1–3, Team B includes 4–7; F5 remains independent', () => {
   const data = fixture();
   group(data, '1').verifiedSold = 20;

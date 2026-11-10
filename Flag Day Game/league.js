@@ -68,6 +68,69 @@ export function getAchievements(group) {
   return ACHIEVEMENTS.map(a => ({ ...a, unlocked: group.verifiedSold >= a.threshold }));
 }
 
+function sheetCell(row, index) {
+  return row?.c?.[index]?.v ?? null;
+}
+
+function sheetGroupId(label) {
+  const normalized = String(label ?? '').replace(/\s+/g, '');
+  const regularGroup = normalized.match(/^第([1-7])组$/);
+  if (regularGroup) return regularGroup[1];
+  if (/^F5(?:Gang)?组?$/i.test(normalized)) return 'f5';
+  return null;
+}
+
+export function eventFromSheetTable(baseData, table, syncedAt) {
+  validateEvent(baseData);
+  validateDate(syncedAt, '同步时间', false);
+  if (!table || !Array.isArray(table.rows)) fail('Google Sheets 回传的表格格式无效。');
+
+  const sheetGroups = new Map();
+  let reportedTotal = null;
+  for (const row of table.rows) {
+    const label = sheetCell(row, 0);
+    if (String(label ?? '').replace(/\s+/g, '') === '总计') {
+      reportedTotal = { sold: Number(sheetCell(row, 2) ?? 0), received: Number(sheetCell(row, 3) ?? 0) };
+      continue;
+    }
+    const id = sheetGroupId(label);
+    if (!id) continue;
+    if (sheetGroups.has(id)) fail(`Google Sheets 出现重复的第 ${id} 组资料。`);
+    const verifiedSold = Number(sheetCell(row, 2) ?? 0);
+    const treasuryReceived = Number(sheetCell(row, 3) ?? 0);
+    if (!Number.isSafeInteger(verifiedSold) || verifiedSold < 0) fail(`Google Sheets 第 ${id} 组的累计销量无效。`);
+    if (!Number.isFinite(treasuryReceived) || treasuryReceived < 0) fail(`Google Sheets 第 ${id} 组的累计收款无效。`);
+    sheetGroups.set(id, { verifiedSold, treasuryReceived });
+  }
+  for (const id of GROUP_IDS) {
+    if (!sheetGroups.has(id)) fail(`Google Sheets 缺少第 ${id} 组资料。`);
+  }
+
+  const groups = baseData.groups.map(group => {
+    const live = sheetGroups.get(group.id);
+    return {
+      ...group,
+      ...live,
+      handoffComplete: group.handoffComplete && live.treasuryReceived === live.verifiedSold * PRICE,
+    };
+  });
+  const calculatedSold = groups.reduce((sum, group) => sum + group.verifiedSold, 0);
+  const calculatedReceived = groups.reduce((sum, group) => sum + group.treasuryReceived, 0);
+  if (reportedTotal && (reportedTotal.sold !== calculatedSold || reportedTotal.received !== calculatedReceived)) {
+    fail('Google Sheets 总计与各组累计数字不一致。');
+  }
+
+  const event = {
+    ...baseData,
+    updatedAt: syncedAt,
+    groups,
+    source: 'google-sheets',
+    syncedAt,
+  };
+  validateEvent(event);
+  return event;
+}
+
 export function summarizeEvent(data) {
   validateEvent(data);
   const groups = data.status === 'final' ? data.finalSnapshot.groups : data.groups;
