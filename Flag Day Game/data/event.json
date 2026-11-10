@@ -1,10 +1,10 @@
 {
-  "updatedAt": null,
+  "updatedAt": "2026-11-10T13:38:00+08:00",
   "deadline": null,
   "status": "live",
   "groups": [
     { "id": "1", "name": "第 1 组", "verifiedSold": 0, "treasuryReceived": 0, "handoffComplete": false },
-    { "id": "2", "name": "第 2 组", "verifiedSold": 0, "treasuryReceived": 0, "handoffComplete": false },
+    { "id": "2", "name": "第 2 组", "verifiedSold": 1, "treasuryReceived": 5, "handoffComplete": false },
     { "id": "3", "name": "第 3 组", "verifiedSold": 0, "treasuryReceived": 0, "handoffComplete": false },
     { "id": "4", "name": "第 4 组", "verifiedSold": 0, "treasuryReceived": 0, "handoffComplete": false },
     { "id": "5", "name": "第 5 组", "verifiedSold": 0, "treasuryReceived": 0, "handoffComplete": false },
