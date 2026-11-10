@@ -5,6 +5,7 @@ const number = value => new Intl.NumberFormat('en-MY').format(value);
 const money = value => `RM ${new Intl.NumberFormat('en-MY', { minimumFractionDigits: Number.isInteger(value) ? 0 : 2, maximumFractionDigits: 2 }).format(value)}`;
 const escape = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const teamStyles = {
+  'a-leads': { color: '#e6ff91', name: 'TEAM A COMMAND', symbol: 'A+' },
   '1': { color: '#c7f36b', name: 'LIME', symbol: '↗' },
   '2': { color: '#8db7ff', name: 'AZURE', symbol: '◇' },
   '3': { color: '#ff997c', name: 'EMBER', symbol: 'ϟ' },
@@ -12,9 +13,10 @@ const teamStyles = {
   '5': { color: '#79dfca', name: 'JADE', symbol: '◈' },
   '6': { color: '#f0cb76', name: 'GOLD', symbol: '⚑' },
   '7': { color: '#f598c4', name: 'ROSE', symbol: '✧' },
+  'b-leads': { color: '#8ad6ff', name: 'TEAM B COMMAND', symbol: 'B+' },
   'f5': { color: '#c6a1ff', name: 'SPECIAL', symbol: 'F5' },
 };
-const SHEET_QUERY_URL = 'https://docs.google.com/spreadsheets/d/1EFONafHGDB-qucQ8V9CL3kPJN1_RfaTyxrZ9KC2ht_8/gviz/tq?gid=0&range=A4:D13';
+const SHEET_QUERY_URL = 'https://docs.google.com/spreadsheets/d/1EFONafHGDB-qucQ8V9CL3kPJN1_RfaTyxrZ9KC2ht_8/gviz/tq?gid=0&range=A4:D15';
 function dateText(value) {
   return new Intl.DateTimeFormat('zh-Hans', { timeZone: 'Asia/Kuala_Lumpur', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(value));
 }
@@ -30,7 +32,7 @@ function render(data) {
   setText('mission-percent', `${summary.milestoneProgress}%`);
   $('mission-ring').style.setProperty('--progress', `${summary.milestoneProgress * 3.6}deg`);
   $('mission-bar').style.width = `${summary.milestoneProgress}%`;
-  setText('mission-caption', summary.milestones ? `已解锁 ${number(summary.milestones)} 站 · 距下一站还差 ${number(summary.nextMilestone - summary.totalSold)} 张。` : '第 1–7 组 + F5 Gang，共同贡献每一张。');
+  setText('mission-caption', summary.milestones ? `已解锁 ${number(summary.milestones)} 站 · 距下一站还差 ${number(summary.nextMilestone - summary.totalSold)} 张。` : '九支参赛队 + F5 Gang，共同贡献每一张。');
   setText('stat-sold', `${number(summary.totalSold)} 张`);
   setText('stat-value', money(summary.totalValue));
   setText('stat-received', money(summary.treasuryReceived));
@@ -82,12 +84,13 @@ function render(data) {
     const next = achievements.find(a => !a.unlocked);
     const progress = next ? Math.min(100, group.verifiedSold / next.threshold * 100) : 100;
     const unlockedCount = achievements.filter(a => a.unlocked).length + Number(group.handoffComplete);
-    return `<details class="squad-card" style="--team-color:${style.color}"><summary><div class="squad-top"><span class="squad-number">${id === 'f5' ? 'SPECIAL CHALLENGER' : `SQUAD / 0${id}`}</span><span class="squad-open" aria-hidden="true">+</span></div><div class="squad-identity"><span class="squad-emblem" aria-hidden="true">${style.symbol}</span><div><h3>${escape(group.name)}</h3><span class="squad-code">${style.name} ${id === 'f5' ? '/ F5' : `/ UNIT 0${id}`}</span></div></div><div class="squad-sales"><strong>${number(group.verifiedSold)}</strong><span>张已核实</span><span class="squad-value">${money(group.verifiedSold * PRICE)}</span></div><div class="squad-progress"><div style="width:${progress}%"></div></div><div class="squad-next"><span>${next ? `下一成就 · ${next.title}` : '四个销量成就全部解锁'}</span><span>${next ? `${number(group.verifiedSold)} / ${next.threshold}` : '100 / 100'}</span></div><div class="squad-badge-preview">${achievements.map(a => `<span class="preview-badge ${a.unlocked ? 'unlocked' : ''}" title="${a.threshold} 张 · ${a.title}${a.unlocked ? '（已解锁）' : '（未解锁）'}" aria-label="${a.title}${a.unlocked ? '已解锁' : '未解锁'}">${a.symbol}</span>`).join('')}<span class="preview-badge ${group.handoffComplete ? 'unlocked' : ''}" title="圆满交接${group.handoffComplete ? '（已解锁）' : '（待完成）'}" aria-label="圆满交接${group.handoffComplete ? '已解锁' : '待完成'}">✓</span><span class="badge-count">${unlockedCount}/5 成就</span></div></summary><div class="squad-detail"><ul class="achievement-list">${achievements.map(a => `<li class="${a.unlocked ? 'is-unlocked' : ''}"><span aria-hidden="true">${a.symbol}</span><strong>${a.title}</strong><span>${a.threshold} 张 · ${a.unlocked ? '已解锁' : '未解锁'}</span></li>`).join('')}<li class="${group.handoffComplete ? 'is-unlocked' : ''}"><span aria-hidden="true">✓</span><strong>圆满交接</strong><span>${group.handoffComplete ? '已完成' : '待完成'}</span></li></ul><div class="detail-finance"><span>财政已收 <strong>${money(group.treasuryReceived)}</strong></span><span>尚待交财政 <strong>${money(group.verifiedSold * PRICE - group.treasuryReceived)}</strong></span></div><p class="detail-note">圆满交接由负责人确认记录、钱款和剩余贴纸已全部交齐。</p></div></details>`;
+    const unitCode = id === 'f5' ? 'F5' : id.endsWith('leads') ? 'LEADERS' : `UNIT 0${id}`;
+    return `<details class="squad-card" style="--team-color:${style.color}"><summary><div class="squad-top"><span class="squad-number">${id === 'f5' ? 'SPECIAL CHALLENGER' : id.endsWith('leads') ? 'LEADERS SQUAD' : `SQUAD / 0${id}`}</span><span class="squad-open" aria-hidden="true">+</span></div><div class="squad-identity"><span class="squad-emblem" aria-hidden="true">${style.symbol}</span><div><h3>${escape(group.name)}</h3><span class="squad-code">${style.name} / ${unitCode}</span></div></div><div class="squad-sales"><strong>${number(group.verifiedSold)}</strong><span>张已核实</span><span class="squad-value">${money(group.verifiedSold * PRICE)}</span></div><div class="squad-progress"><div style="width:${progress}%"></div></div><div class="squad-next"><span>${next ? `下一成就 · ${next.title}` : '四个销量成就全部解锁'}</span><span>${next ? `${number(group.verifiedSold)} / ${next.threshold}` : '100 / 100'}</span></div><div class="squad-badge-preview">${achievements.map(a => `<span class="preview-badge ${a.unlocked ? 'unlocked' : ''}" title="${a.threshold} 张 · ${a.title}${a.unlocked ? '（已解锁）' : '（未解锁）'}" aria-label="${a.title}${a.unlocked ? '已解锁' : '未解锁'}">${a.symbol}</span>`).join('')}<span class="preview-badge ${group.handoffComplete ? 'unlocked' : ''}" title="圆满交接${group.handoffComplete ? '（已解锁）' : '（待完成）'}" aria-label="圆满交接${group.handoffComplete ? '已解锁' : '待完成'}">✓</span><span class="badge-count">${unlockedCount}/5 成就</span></div></summary><div class="squad-detail"><ul class="achievement-list">${achievements.map(a => `<li class="${a.unlocked ? 'is-unlocked' : ''}"><span aria-hidden="true">${a.symbol}</span><strong>${a.title}</strong><span>${a.threshold} 张 · ${a.unlocked ? '已解锁' : '未解锁'}</span></li>`).join('')}<li class="${group.handoffComplete ? 'is-unlocked' : ''}"><span aria-hidden="true">✓</span><strong>圆满交接</strong><span>${group.handoffComplete ? '已完成' : '待完成'}</span></li></ul><div class="detail-finance"><span>财政已收 <strong>${money(group.treasuryReceived)}</strong></span><span>尚待交财政 <strong>${money(group.verifiedSold * PRICE - group.treasuryReceived)}</strong></span></div><p class="detail-note">圆满交接由负责人确认记录、钱款和剩余贴纸已全部交齐。</p></div></details>`;
   }).join('');
   setText('data-announcement', `${final ? '最终成绩' : '成绩'}已加载，全团核实 ${number(summary.totalSold)} 张贴纸。`);
   GROUP_IDS.forEach((id, index) => {
     const team = getTeamForGroup(id);
-    $('squad-grid').children[index].querySelector('.squad-number').textContent = team ? `${team.name.toUpperCase()} / SQUAD 0${id}` : 'SPECIAL CHALLENGER';
+    $('squad-grid').children[index].querySelector('.squad-number').textContent = team ? `${team.name.toUpperCase()} / ${id.endsWith('leads') ? 'LEADERS' : `SQUAD 0${id}`}` : 'SPECIAL CHALLENGER';
   });
   $('stats').setAttribute('aria-busy', 'false');
 }

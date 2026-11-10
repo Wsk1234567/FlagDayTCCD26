@@ -3,11 +3,13 @@
   "deadline": null,
   "status": "live",
   "groups": [
+    { "id": "a-leads", "name": "A队队长&副队长", "verifiedSold": 0, "treasuryReceived": 0, "handoffComplete": false },
     { "id": "1", "name": "第 1 组", "verifiedSold": 0, "treasuryReceived": 0, "handoffComplete": false },
-    { "id": "2", "name": "第 2 组", "verifiedSold": 1, "treasuryReceived": 5, "handoffComplete": false },
+    { "id": "2", "name": "第 2 组", "verifiedSold": 0, "treasuryReceived": 0, "handoffComplete": false },
     { "id": "3", "name": "第 3 组", "verifiedSold": 0, "treasuryReceived": 0, "handoffComplete": false },
+    { "id": "b-leads", "name": "B队队长&副队长", "verifiedSold": 0, "treasuryReceived": 0, "handoffComplete": false },
     { "id": "4", "name": "第 4 组", "verifiedSold": 0, "treasuryReceived": 0, "handoffComplete": false },
-    { "id": "5", "name": "第 5 组", "verifiedSold": 0, "treasuryReceived": 0, "handoffComplete": false },
+    { "id": "5", "name": "第 5 组", "verifiedSold": 1, "treasuryReceived": 5, "handoffComplete": false },
     { "id": "6", "name": "第 6 组", "verifiedSold": 0, "treasuryReceived": 0, "handoffComplete": false },
     { "id": "7", "name": "第 7 组", "verifiedSold": 0, "treasuryReceived": 0, "handoffComplete": false },
     { "id": "f5", "name": "F5 Gang", "verifiedSold": 18, "treasuryReceived": 90, "handoffComplete": false }

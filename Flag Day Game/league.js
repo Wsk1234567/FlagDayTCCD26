@@ -1,8 +1,9 @@
 export const PRICE = 5;
-export const GROUP_IDS = ['1', '2', '3', '4', '5', '6', '7', 'f5'];
+export const GROUP_IDS = ['a-leads', '1', '2', '3', 'b-leads', '4', '5', '6', '7', 'f5'];
+export const COMPETITOR_IDS = GROUP_IDS.filter(id => id !== 'f5');
 export const TEAMS = [
-  { id: 'a', name: 'Team A', groupIds: ['1', '2', '3'] },
-  { id: 'b', name: 'Team B', groupIds: ['4', '5', '6', '7'] },
+  { id: 'a', name: 'Team A', groupIds: ['a-leads', '1', '2', '3'] },
+  { id: 'b', name: 'Team B', groupIds: ['b-leads', '4', '5', '6', '7'] },
 ];
 export function getTeamForGroup(id) { return TEAMS.find(team => team.groupIds.includes(id)) ?? null; }
 export const ACHIEVEMENTS = [
@@ -24,7 +25,7 @@ function validateDate(value, label, nullable = true) {
 }
 
 function validateGroups(groups) {
-  if (!Array.isArray(groups) || groups.length !== GROUP_IDS.length) fail('必须包含第 1–7 组和 F5 共八组。');
+  if (!Array.isArray(groups) || groups.length !== GROUP_IDS.length) fail('必须包含第 1–7 组、两支队长组和 F5，共十组。');
   const seen = new Set();
   for (const group of groups) {
     if (!group || !GROUP_IDS.includes(group.id) || seen.has(group.id)) fail('小组编号缺失、重复或无效。');
@@ -56,7 +57,8 @@ export function validateEvent(data) {
 }
 
 export function rankGroups(groups) {
-  const sorted = groups.filter(g => g.id !== 'f5').slice().sort((a, b) => b.verifiedSold - a.verifiedSold || Number(a.id) - Number(b.id));
+  const order = new Map(COMPETITOR_IDS.map((id, index) => [id, index]));
+  const sorted = groups.filter(g => g.id !== 'f5').slice().sort((a, b) => b.verifiedSold - a.verifiedSold || order.get(a.id) - order.get(b.id));
   return sorted.map((group, index) => {
     const firstEqual = sorted.findIndex(g => g.verifiedSold === group.verifiedSold);
     const higher = sorted.slice(0, index).filter(g => g.verifiedSold > group.verifiedSold).at(-1);
@@ -73,9 +75,11 @@ function sheetCell(row, index) {
 }
 
 function sheetGroupId(label) {
-  const normalized = String(label ?? '').replace(/\s+/g, '');
+  const normalized = String(label ?? '').replace(/\s+/g, '').replace(/＆/g, '&');
   const regularGroup = normalized.match(/^第([1-7])组$/);
   if (regularGroup) return regularGroup[1];
+  if (/^(?:Team)?A队?(?:队长&副队长|领导组)$/i.test(normalized)) return 'a-leads';
+  if (/^(?:Team)?B队?(?:队长&副队长|领导组)$/i.test(normalized)) return 'b-leads';
   if (/^F5(?:Gang)?组?$/i.test(normalized)) return 'f5';
   return null;
 }
@@ -103,6 +107,7 @@ export function eventFromSheetTable(baseData, table, syncedAt) {
     sheetGroups.set(id, { verifiedSold, treasuryReceived });
   }
   for (const id of GROUP_IDS) {
+    if (!sheetGroups.has(id) && id.endsWith('leads')) sheetGroups.set(id, { verifiedSold: 0, treasuryReceived: 0 });
     if (!sheetGroups.has(id)) fail(`Google Sheets 缺少第 ${id} 组资料。`);
   }
 
